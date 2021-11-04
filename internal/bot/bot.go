@@ -29,14 +29,12 @@ func Run() {
 
 	bot.Debug = true
 	listenMessages(bot, db)
-	//log.Printf("Authorized on account %s", bot.Self.UserName)
-
 }
 
 func listenMessages(bot *tgbotapi.BotAPI, db *pgxpool.Pool) {
 	chatId := viper.GetInt64("TELEGRAM_CHAT_ID")
 
-	err := gocron.Every(1).Minute().Do(sendUrlMessages, chatId, bot)
+	err := gocron.Every(1).Minute().Do(sendUrlMessages, chatId, bot, db)
 	if err != nil {
 		log.Fatal(err)
 		return

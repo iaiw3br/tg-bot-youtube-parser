@@ -26,33 +26,23 @@ func Run() {
 }
 
 func listenMessages(bot *tgbotapi.BotAPI) {
-	u := tgbotapi.NewUpdate(0)
-	u.Timeout = 60
-	updates, err := bot.GetUpdatesChan(u)
-	if err != nil {
-		log.Fatal(err)
-	}
 	chatId := viper.GetInt64("TELEGRAM_CHAT_ID")
 
+	err := gocron.Every(1).Minute().Do(sendUrlMessages, chatId, bot)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	<-gocron.Start()
+}
+
+func sendUrlMessages(chatId int64, bot *tgbotapi.BotAPI) {
 	urls, err := GetUrls()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for update := range updates {
-		if update.Message == nil { // ignore any non-Message Updates
-			continue
-		}
-		err := gocron.Every(1).Minute().Do(sendUrlMessages, urls, chatId, bot)
-		if err != nil {
-			log.Fatal(err)
-			return
-		}
-		<-gocron.Start()
-	}
-}
-
-func sendUrlMessages(urls [2]string, chatId int64, bot *tgbotapi.BotAPI) {
 	for _, url := range urls {
 		videoUrl, err := GetLastVideo(url)
 		if err != nil {

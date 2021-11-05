@@ -41,3 +41,16 @@ func ExistVideo(db *pgxpool.Pool, videoId string) (bool, error) {
 
 	return exist, nil
 }
+
+func AddVideo(db *pgxpool.Pool, videoId string) error {
+	query := `
+		INSERT INTO public.videos (id)
+		VALUES ($1);`
+
+	_, err := db.Query(context.Background(), query, videoId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

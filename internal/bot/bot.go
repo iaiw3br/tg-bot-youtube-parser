@@ -34,7 +34,7 @@ func Run() {
 func listenMessages(bot *tgbotapi.BotAPI, db *pgxpool.Pool) {
 	chatId := viper.GetInt64("TELEGRAM_CHAT_ID")
 
-	err := gocron.Every(1).Minute().Do(sendUrlMessages, chatId, bot, db)
+	err := gocron.Every(1).Second().Do(sendUrlMessages, chatId, bot, db)
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -50,10 +50,22 @@ func sendUrlMessages(chatId int64, bot *tgbotapi.BotAPI, db *pgxpool.Pool) {
 	}
 
 	for _, url := range urls {
-		videoUrl, err := GetLastVideo(url)
+		videoId, err := GetLastVideoId(url)
 		if err != nil {
 			log.Fatal(err)
 			return
+		}
+		youtubeVideoUrl := viper.GetString("YOUTUBE_VIDEO_URL")
+		videoUrl := youtubeVideoUrl + videoId
+
+		existVideo, err := database.ExistVideo(db, videoId)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		if existVideo {
+			continue
 		}
 
 		msg := tgbotapi.NewMessage(chatId, videoUrl)

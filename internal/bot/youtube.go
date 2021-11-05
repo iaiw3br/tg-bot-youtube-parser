@@ -11,8 +11,7 @@ import (
 	"tg-bot-youtube-parser/internal/models"
 )
 
-func GetLastVideo(channelUrl string) (string, error) {
-	youtubeVideoUrl := viper.GetString("YOUTUBE_VIDEO_URL")
+func GetLastVideoId(channelUrl string) (string, error) {
 	items, err := getVideoByFilter(channelUrl)
 	if err != nil {
 		return "", err
@@ -21,7 +20,7 @@ func GetLastVideo(channelUrl string) (string, error) {
 		return "", errors.New("video not found")
 	}
 
-	return youtubeVideoUrl + items[0].Id.VideoId, nil
+	return items[0].Id.VideoId, nil
 }
 
 func getVideoByFilter(channelUrl string) ([]models.Item, error) {

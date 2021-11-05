@@ -26,3 +26,18 @@ func GetAllURLs(db *pgxpool.Pool) ([]string, error) {
 
 	return urls, nil
 }
+
+func ExistVideo(db *pgxpool.Pool, videoId string) (bool, error) {
+	var exist bool
+	query := `
+		SELECT count(*) > 0 as exist 
+		FROM public.videos 
+		WHERE id = $1;`
+
+	err := db.QueryRow(context.Background(), query, videoId).Scan(&exist)
+	if err != nil {
+		return false, err
+	}
+
+	return exist, nil
+}
